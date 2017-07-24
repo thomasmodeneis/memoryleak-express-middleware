@@ -6,7 +6,6 @@ This will help you to identify possible leaks on your app and avoid having memor
 # How does it work?
 This module was designed to be a thin wrapper around memwatch-next and enable you to plug it into your existing ExpressJS app. 
 
-See the below UML diagram for a complete architecture view:
 
 Implementation example:
 

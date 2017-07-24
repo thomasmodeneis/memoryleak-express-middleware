@@ -1,6 +1,6 @@
 {
   "name": "memoryleak-express-middleware",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -9,8 +9,8 @@
     "kill": "ps -ef |grep demo/index.js |awk {'print $2'} |xargs kill -15",
     "build": "babel src -d dist"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Thomas Modeneis",
+  "license": "MIT",
   "dependencies": {
     "express": "^4.15.3",
     "memwatch-next": "^0.3.0"
