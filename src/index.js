@@ -11,6 +11,7 @@ class MemoryLeakExpressMiddleware {
     this.routeName = options.routeName || 'memoryleak';
     this.routeNameDump = options.routeNameDump || 'memoryleak-dump';
     this.monitorLeaks = options.monitorLeaks || this.monitorLeaks;
+    this.secret = options.secret;
     this.heapdiff = null;
     this.hasDumped = false;
     this.lastDump = null;
@@ -34,7 +35,8 @@ class MemoryLeakExpressMiddleware {
      * This endpoint will process a Dump Diff, if there the dump was not yet processed, it will create a new one and dump diff right after.
      */
     this.routes.get(`/${this.routeName}`, (req, res) => {
-      if (this.MEMORYLEAK_MIDDLEWARE_ENABLED) {
+      let secret = req.query.secret;
+      if (this.MEMORYLEAK_MIDDLEWARE_ENABLED && secret === this.secret) {
         // if no dump was taken, do it now
         if (!this.heapdiff || this.hasDumped) {
           this.heapdiff = new memwatch.HeapDiff();
@@ -59,7 +61,8 @@ class MemoryLeakExpressMiddleware {
      * This endpoint will process a new dump, every time this endpoint is called, a new Dump will be processed.
      */
     this.routes.get(`/${this.routeNameDump}`, (req, res) => {
-      if (this.MEMORYLEAK_MIDDLEWARE_ENABLED) {
+      let secret = req.query.secret;
+      if (this.MEMORYLEAK_MIDDLEWARE_ENABLED && secret === this.secret) {
         //reset the current dump to now
         this.heapdiff = new memwatch.HeapDiff();
         this.lastDump = new Date();

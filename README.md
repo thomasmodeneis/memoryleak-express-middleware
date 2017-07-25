@@ -44,7 +44,7 @@ routes.listen(PORT, function (err) {
 4) routeName, set here the endpoint name you would like to set for getting dump diff. Default /memoryleak
 5) routeNameDump, set the endpoint name you would like to set for starting a new dump. Default /memoryleak-dump
 6) monitorLeaks, this will listen to leak events on memwatch. Useful if you would like to set leak events as errors, or if you would like to do anything else with it. Default: will log memory leaks as WARN.
-
+7) password, this is a password you may set in order to "protect" the endpoints from being hit by others. Default none.
 
 ## Author
 * Thomas Modeneis
