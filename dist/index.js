@@ -56,7 +56,11 @@ var MemoryLeakExpressMiddleware = function () {
        */
       this.routes.get('/' + this.routeName, function (req, res) {
         var secret = req.query.secret;
-        if (_this2.MEMORYLEAK_MIDDLEWARE_ENABLED && secret === _this2.secret) {
+        if (secret !== _this2.secret) {
+          // Send 404 in order to avoid giving internal info about endpoints
+          return res.sendStatus(404);
+        }
+        if (_this2.MEMORYLEAK_MIDDLEWARE_ENABLED) {
           // if no dump was taken, do it now
           if (!_this2.heapdiff || _this2.hasDumped) {
             _this2.heapdiff = new _memwatchNext2.default.HeapDiff();
@@ -82,7 +86,11 @@ var MemoryLeakExpressMiddleware = function () {
        */
       this.routes.get('/' + this.routeNameDump, function (req, res) {
         var secret = req.query.secret;
-        if (_this2.MEMORYLEAK_MIDDLEWARE_ENABLED && secret === _this2.secret) {
+        if (secret !== _this2.secret) {
+          // Send 404 in order to avoid giving internal info about endpoints
+          return res.sendStatus(404);
+        }
+        if (_this2.MEMORYLEAK_MIDDLEWARE_ENABLED) {
           //reset the current dump to now
           _this2.heapdiff = new _memwatchNext2.default.HeapDiff();
           _this2.lastDump = new Date();

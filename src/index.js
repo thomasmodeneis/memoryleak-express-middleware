@@ -36,7 +36,11 @@ class MemoryLeakExpressMiddleware {
      */
     this.routes.get(`/${this.routeName}`, (req, res) => {
       let secret = req.query.secret;
-      if (this.MEMORYLEAK_MIDDLEWARE_ENABLED && secret === this.secret) {
+      if (secret !== this.secret){
+        // Send 404 in order to avoid giving internal info about endpoints
+        return res.sendStatus(404);
+      }
+      if (this.MEMORYLEAK_MIDDLEWARE_ENABLED) {
         // if no dump was taken, do it now
         if (!this.heapdiff || this.hasDumped) {
           this.heapdiff = new memwatch.HeapDiff();
@@ -62,7 +66,11 @@ class MemoryLeakExpressMiddleware {
      */
     this.routes.get(`/${this.routeNameDump}`, (req, res) => {
       let secret = req.query.secret;
-      if (this.MEMORYLEAK_MIDDLEWARE_ENABLED && secret === this.secret) {
+      if (secret !== this.secret){
+        // Send 404 in order to avoid giving internal info about endpoints
+        return res.sendStatus(404);
+      }
+      if (this.MEMORYLEAK_MIDDLEWARE_ENABLED) {
         //reset the current dump to now
         this.heapdiff = new memwatch.HeapDiff();
         this.lastDump = new Date();

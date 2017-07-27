@@ -50,7 +50,7 @@ describe('MemoryLeak Express Middleware', () => {
 
       request.get('http://localhost:16789/memoryleak?secret=test', (err, res, body) => {
         should.not.exist(err);
-        response.statusCode.should.equal(200);
+        res.statusCode.should.equal(200);
         const json = JSON.parse(body);
 
         should.exist(json.heapdiff);
@@ -80,17 +80,17 @@ describe('MemoryLeak Express Middleware', () => {
 
       request.get('http://localhost:16789/memoryleak-dump?secret=test123', (err, res, body) => {
         should.not.exist(err);
-        response.statusCode.should.equal(200);
+        res.statusCode.should.equal(200);
         const json = JSON.parse(body);
 
         should.exist(json.MEMORYLEAK_MIDDLEWARE_ENABLED);
         should.exist(json.lastDump);
 
         setTimeout(() => {
-          request.get('http://localhost:16789/memoryleak?secret=test123', (err, res, body) => {
-            should.not.exist(err);
-            response.statusCode.should.equal(200);
-            const json = JSON.parse(body);
+          request.get('http://localhost:16789/memoryleak?secret=test123', (err2, res2, body2) => {
+            should.not.exist(err2);
+            res2.statusCode.should.equal(200);
+            const json = JSON.parse(body2);
 
             should.exist(json.heapdiff);
             should.exist(json.lastDump);
@@ -122,7 +122,7 @@ describe('MemoryLeak Express Middleware', () => {
 
       request.get('http://localhost:16789/memoryleak', (err, res, body) => {
         should.not.exist(err);
-        response.statusCode.should.equal(200);
+        res.statusCode.should.equal(200);
         const json = JSON.parse(body);
 
         should.exist(json.heapdiff);
@@ -131,10 +131,10 @@ describe('MemoryLeak Express Middleware', () => {
         json.diffElapsedSeconds.should.equal(0);
 
         setTimeout(() => {
-          request.get('http://localhost:16789/memoryleak', (err, res, body) => {
-            should.not.exist(err);
-            response.statusCode.should.equal(200);
-            const json = JSON.parse(body);
+          request.get('http://localhost:16789/memoryleak', (err2, res2, body2) => {
+            should.not.exist(err2);
+            res2.statusCode.should.equal(200);
+            const json = JSON.parse(body2);
 
             should.exist(json.heapdiff);
             should.exist(json.lastDump);
@@ -144,6 +144,43 @@ describe('MemoryLeak Express Middleware', () => {
             done();
           })
         }, 5000);
+
+      });
+
+    });
+
+  });
+
+
+  it('Should start with 200 and respond with a 404 when using wrong secret', (done) => {
+
+    new MemoryLeakExpressMiddleware({
+      MEMORYLEAK_MIDDLEWARE_ENABLED: true,
+      routes: routes,
+      secret: 'test321'
+    }).middleware();
+
+    request.get(`http://localhost:${PORT}/`, (err, response) => {
+      should.not.exist(err);
+      response.statusCode.should.equal(200);
+
+
+      request.get('http://localhost:16789/memoryleak', (err2, res2) => {
+        should.not.exist(err2);
+        res2.statusCode.should.equal(404);
+
+        setTimeout(() => {
+          request.get('http://localhost:16789/memoryleak?secret=test123', (err3, res3) => {
+            should.not.exist(err3);
+            res3.statusCode.should.equal(404);
+
+            request.get('http://localhost:16789/memoryleak?secret=test123', (err4, res4) => {
+              should.not.exist(err4);
+              res4.statusCode.should.equal(404);
+              done();
+            });
+          });
+        }, 1000);
 
       });
 
