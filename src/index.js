@@ -1,4 +1,5 @@
 import memwatch from 'memwatch-next';
+import heapdump from 'heapdump';
 
 class MemoryLeakExpressMiddleware {
 
@@ -10,6 +11,7 @@ class MemoryLeakExpressMiddleware {
     this.routes = options.routes;
     this.routeName = options.routeName || 'memoryleak';
     this.routeNameDump = options.routeNameDump || 'memoryleak-dump';
+    this.routeNameFileDump = options.routeNameFileDump || 'memoryleak-file-dump"'
     this.monitorLeaks = options.monitorLeaks || this.monitorLeaks;
     this.secret = options.secret;
     this.heapdiff = null;
@@ -79,6 +81,26 @@ class MemoryLeakExpressMiddleware {
       return res.send({
         MEMORYLEAK_MIDDLEWARE_ENABLED: this.MEMORYLEAK_MIDDLEWARE_ENABLED,
         lastDump: this.lastDump
+      });
+    })
+
+    /**
+     * This endpoint will generate a new file dump, every time this endpoint is called.
+     */
+    this.routes.get(`/${this.routeNameFileDump}`, (req, res) => {
+      let secret = req.query.secret;
+      if (secret !== this.secret){
+        // Send 404 in order to avoid giving internal info about endpoints
+        return res.sendStatus(404);
+      }
+      if (this.MEMORYLEAK_MIDDLEWARE_ENABLED) {
+        filename='/var/local/' + Date.now() + '.heapsnapshot'
+        heapdump.writeSnapshot(function(err, filename) {
+          console.log('dump written to', filename);
+        });
+      }
+      return res.send({
+        MEMORYLEAK_MIDDLEWARE_ENABLED: this.MEMORYLEAK_MIDDLEWARE_ENABLED
       });
     })
   }
