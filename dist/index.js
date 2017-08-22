@@ -6,6 +6,10 @@ var _memwatchNext = require('memwatch-next');
 
 var _memwatchNext2 = _interopRequireDefault(_memwatchNext);
 
+var _heapdump = require('heapdump');
+
+var _heapdump2 = _interopRequireDefault(_heapdump);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -23,6 +27,7 @@ var MemoryLeakExpressMiddleware = function () {
     this.routes = options.routes;
     this.routeName = options.routeName || 'memoryleak';
     this.routeNameDump = options.routeNameDump || 'memoryleak-dump';
+    this.routeNameFileDump = options.routeNameFileDump || 'memoryleak-file-dump';
     this.monitorLeaks = options.monitorLeaks || this.monitorLeaks;
     this.secret = options.secret;
     this.heapdiff = null;
@@ -100,6 +105,31 @@ var MemoryLeakExpressMiddleware = function () {
           MEMORYLEAK_MIDDLEWARE_ENABLED: _this2.MEMORYLEAK_MIDDLEWARE_ENABLED,
           lastDump: _this2.lastDump
         });
+      });
+
+      /**
+       * This endpoint will generate a new file dump, every time this endpoint is called.
+       */
+      this.routes.get('/' + this.routeNameFileDump, function (req, res) {
+        var secret = req.query.secret;
+        if (secret !== _this2.secret) {
+          // Send 404 in order to avoid giving internal info about endpoints
+          return res.sendStatus(404);
+        }
+        if (_this2.MEMORYLEAK_MIDDLEWARE_ENABLED) {
+          var filename = '/var/local/heapdump-' + Date.now() + '.heapsnapshot';
+          _heapdump2.default.writeSnapshot(filename, function (err, filename) {
+            return res.send({
+              MEMORYLEAK_MIDDLEWARE_ENABLED: this.MEMORYLEAK_MIDDLEWARE_ENABLED,
+              lastDump: 'V8 Memory Dump written to ' + filename
+            });
+          });
+        } else {
+          // not enabled, return empty hands
+          return res.send({
+            MEMORYLEAK_MIDDLEWARE_ENABLED: _this2.MEMORYLEAK_MIDDLEWARE_ENABLED
+          });
+        }
       });
     }
   }]);

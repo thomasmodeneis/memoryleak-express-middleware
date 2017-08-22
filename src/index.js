@@ -11,7 +11,7 @@ class MemoryLeakExpressMiddleware {
     this.routes = options.routes;
     this.routeName = options.routeName || 'memoryleak';
     this.routeNameDump = options.routeNameDump || 'memoryleak-dump';
-    this.routeNameFileDump = options.routeNameFileDump || 'memoryleak-file-dump"'
+    this.routeNameFileDump = options.routeNameFileDump || 'memoryleak-file-dump';
     this.monitorLeaks = options.monitorLeaks || this.monitorLeaks;
     this.secret = options.secret;
     this.heapdiff = null;
@@ -38,7 +38,7 @@ class MemoryLeakExpressMiddleware {
      */
     this.routes.get(`/${this.routeName}`, (req, res) => {
       let secret = req.query.secret;
-      if (secret !== this.secret){
+      if (secret !== this.secret) {
         // Send 404 in order to avoid giving internal info about endpoints
         return res.sendStatus(404);
       }
@@ -68,7 +68,7 @@ class MemoryLeakExpressMiddleware {
      */
     this.routes.get(`/${this.routeNameDump}`, (req, res) => {
       let secret = req.query.secret;
-      if (secret !== this.secret){
+      if (secret !== this.secret) {
         // Send 404 in order to avoid giving internal info about endpoints
         return res.sendStatus(404);
       }
@@ -89,19 +89,24 @@ class MemoryLeakExpressMiddleware {
      */
     this.routes.get(`/${this.routeNameFileDump}`, (req, res) => {
       let secret = req.query.secret;
-      if (secret !== this.secret){
+      if (secret !== this.secret) {
         // Send 404 in order to avoid giving internal info about endpoints
         return res.sendStatus(404);
       }
       if (this.MEMORYLEAK_MIDDLEWARE_ENABLED) {
-        filename='/var/local/' + Date.now() + '.heapsnapshot'
-        heapdump.writeSnapshot(function(err, filename) {
-          console.log('dump written to', filename);
+        const filename = `/var/local/heapdump-${Date.now()}.heapsnapshot`;
+        heapdump.writeSnapshot(filename, function (err, filename) {
+          return res.send({
+            MEMORYLEAK_MIDDLEWARE_ENABLED: this.MEMORYLEAK_MIDDLEWARE_ENABLED,
+            lastDump: `V8 Memory Dump written to ${filename}`
+          });
+        });
+      } else {
+        // not enabled, return empty hands
+        return res.send({
+          MEMORYLEAK_MIDDLEWARE_ENABLED: this.MEMORYLEAK_MIDDLEWARE_ENABLED
         });
       }
-      return res.send({
-        MEMORYLEAK_MIDDLEWARE_ENABLED: this.MEMORYLEAK_MIDDLEWARE_ENABLED
-      });
     })
   }
 

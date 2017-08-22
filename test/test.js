@@ -1,4 +1,7 @@
-const should = require('chai').should();
+const chai = require('chai');
+chai.use(require('chai-string'));
+const should = chai.should();
+
 const request = require('request');
 const express = require('express');
 
@@ -183,6 +186,41 @@ describe('MemoryLeak Express Middleware', () => {
         }, 1000);
 
       });
+
+    });
+
+  });
+
+
+  it('Filedump - Should start with 200 and respond with a 200 when using wrong secret', (done) => {
+
+    new MemoryLeakExpressMiddleware({
+      MEMORYLEAK_MIDDLEWARE_ENABLED: true,
+      routes: routes,
+      secret: 'test321'
+    }).middleware();
+
+    request.get(`http://localhost:${PORT}/`, (err, response) => {
+      should.not.exist(err);
+      response.statusCode.should.equal(200);
+
+
+      request.get('http://localhost:16789/memoryleak-file-dump', (err2, res2) => {
+        should.not.exist(err2);
+        res2.statusCode.should.equal(404);
+
+        setTimeout(() => {
+          request.get('http://localhost:16789/memoryleak-file-dump?secret=test321', (err4, res4, body2) => {
+            should.not.exist(err4);
+            res4.statusCode.should.equal(200);
+            const json = JSON.parse(body2);
+
+            should.exist(json.lastDump);
+            json.lastDump.should.startWith('V8 Memory Dump written to ');
+            done();
+          });
+        });
+      }, 1000);
 
     });
 

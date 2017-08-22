@@ -51,6 +51,9 @@ routes.listen(PORT, function (err) {
 * [StackOverflow](https://careers.stackoverflow.com/thomasmodeneis)
 * [LinkedIn](https://uk.linkedin.com/in/thomasmodeneis)
 
+## Contributors
+* Homero Valle
+
 License
 =======
 
